@@ -1,16 +1,22 @@
-#Snake Duino II
+#Snake Duino III
 --------------
 
-Arduino Snake game controlled by MMA7361 accelerometer
-https://vimeo.com/80697779
+Arduino Snake game controlled by N64 Controller
+
 
 -----------
 >##Components
 > - Nokia 5110 LCD attached to pins 7, 6, 5, 4, 3
 > - Active Buzzer attached to pin 8
-> - MMA7361 accelerometer attached to pins 13, 12, 12, A0, A1 and A2
+> - N64 Controller attached to pin 2
 
---------
+-------------
+>## Libraries
+> - Adafruit GFX     https://github.com/adafruit/Adafruit-GFX-Library
+> - Adafruit PCD8544 https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
+> - N64Controller    http://mbed.org/users/purplelion/code/N64Controller
+
+--------------
 
 >##License
 >THE BEER-WARE LICENSE" (Revision 42):
