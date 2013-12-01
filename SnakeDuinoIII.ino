@@ -8,18 +8,18 @@
 */
 
 /**
-* Snake Duino v2
+* Snake Duino v3
 *
 * Nokia 5110 LCD attached to pins 7, 6, 5, 4, 3
 * Active Buzzer attached to pin 8
-* Accelerometer MMA7361 attached to pins 13, 12, 11, 10, A0, A1 and A2
+* N64 Controller attached to pin 2
 *
 *
 * Libs
 * 
 * Adafruit GFX     https://github.com/adafruit/Adafruit-GFX-Library
 * Adafruit PCD8544 https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
-* mma7361-library  https://code.google.com/p/mma7361-library/
+* N64Controller    http://mbed.org/users/purplelion/code/N64Controller
 *
 * Inspirated in Snake v1.0, Ouarrak Ayoub
 * http://pastebin.com/iAVt9AGJ
@@ -27,7 +27,7 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-#include <AcceleroMMA7361.h>
+#include <N64Controller.h>
 
 /* pins */
 #define SPEAKER_PIN 8
@@ -44,7 +44,7 @@
 
 /* defaults */
 #define SNAKE_LEN   10
-#define SNAKE_SPEED 30
+#define SNAKE_SPEED 40
 
 
 /* lcd display */
@@ -70,10 +70,9 @@ int snakeCols[260];
 // of the snake {cols [snake_lenght], row [snake_lenght]} correspond to the tail
 int snakeRow[260];
 
-// Accelerometer
-AcceleroMMA7361 accelero;
-int x, y, z; /* coords */
-int acceleroSensi = HIGH; /* sensitivity */
+// Controller
+N64Controller control (2);
+
 
 void(* reset)(void) = 0;
 
@@ -86,20 +85,14 @@ void setup()
   randomSeed(analogRead(1));
   
   lcd.begin();
+  control.begin();
   
   pinMode(SPEAKER_PIN, OUTPUT);
   digitalWrite(SPEAKER_PIN, LOW);
-  
-  accelero.begin(13, 12, 11, 10, A0, A1, A2);
-  accelero.setARefVoltage(3.3);
-  accelero.setSensitivity(acceleroSensi);
-  
-  xFood = lcd.width()  / 2;
-  yFood = lcd.height() / 2;
-  
+    
   intro();
   
-  calibrateAccelerometer();
+  resetGame();
 }
 
 /*
@@ -107,34 +100,8 @@ void setup()
  */
 void loop()
 {
-  coords();
-  
   snake();
 }
-
-void coords()
-{
-  lcd.clearDisplay();  
-  
-  accelero.getAccelXYZ(&x, &y, &z);
-  
-  if(false) // for debug
-  {
-    lcd.setTextSize(2);
-    lcd.print("X  ");
-    lcd.println(x);
-  
-    lcd.print("Y  ");
-    lcd.println(y);
-  
-    lcd.print("Z  ");
-    lcd.println(z);
-
-    lcd.display();
-    delay(500);
-  }
-}
-
 /*
  * snake
  */
@@ -145,8 +112,7 @@ void snake()
   
   if(point == 0 || point == points)
   {
-    level++;
-    printLevel();
+    upLevel();
   }  
   lcd.clearDisplay();
   
@@ -258,11 +224,15 @@ void drawSnake()
  */
 void moveSnake()
 {
-  int Xratio = 10;
-  int Yratio = 15;
+  control.update();
+  
+  if(control.button_A() && control.button_B())
+  {
+   reset(); 
+  }  
   
   /* LEFT */
-  if(x < -(Xratio) and right == false)
+  if(control.button_D_left() and right == false)
   {
     if((xSnake > 0 or xSnake <= lcd.width() - xSnake))
       direc(LEFT);
@@ -270,7 +240,7 @@ void moveSnake()
   }
   
   /* RIGHT */
-  if(x > Xratio and left == false)
+  if(control.button_D_right() and left == false)
   {
     if((xSnake > 0 or xSnake <= lcd.width() - xSnake))
       direc(RIGHT);
@@ -278,7 +248,7 @@ void moveSnake()
   }
   
   /* UP */
-  if(y > Yratio and down == false)
+  if(control.button_D_up() and down == false)
   {
     if((ySnake > 0 or ySnake <= lcd.height() - ySnake))
       direc(UP);
@@ -286,14 +256,14 @@ void moveSnake()
   }
   
   /* DOWN */
-  if(y < (Yratio * -1) and up == false)
+  if(control.button_D_down() and up == false)
   {
     if((ySnake > 0 or ySnake <= lcd.height() - ySnake));
       direc(DOWN);
     return;
   }
   
-  if(z < -50)
+  if(control.button_Start())
   {
     showPause();
   }
@@ -306,28 +276,17 @@ void showPause()
 {
   lcd.clearDisplay();
   lcd.setTextSize(2);
+  lcd.setTextColor(WHITE, BLACK);
+  lcd.print(" Pause ");
   lcd.setTextColor(BLACK);
-  lcd.println("Pause!");
-  lcd.println("");
-  lcd.setTextSize(1);
-  lcd.print("Level:  ");
+  lcd.print("Lvl ");
   lcd.println(level);
-  lcd.print("Points: ");
+  lcd.print("Pts ");
   lcd.println(point - 1);
   lcd.display();
+  lcd.setTextSize(1);
   
-  delay(5000);
-}
-
-/*
- * printLevel
- */
-void printLevel()
-{
-  upLevel();
-  
-  point   = 1;
-  points += 10;
+  delay(3500);
 }
 
 /*
@@ -335,8 +294,14 @@ void printLevel()
 */
 void upLevel()
 {
+  level++;
+  
+  point   = 1;
+  points += 10;
+  
   if(level > 1)
   {
+    beep(2000, 50);
     time -= 4;
   }
 }
@@ -360,27 +325,20 @@ void direc(int d)
  */
 void gameover()
 {
-  beep(1000, 100);
+  beep(1000, 200);
   
   lcd.clearDisplay();
   lcd.setTextSize(2);
-  lcd.println("Game");
-  lcd.print("   Over");
-  lcd.setTextSize(1);
-  lcd.print("Level:  ");
+  lcd.setTextColor(WHITE, BLACK);
+  lcd.print("EndGame");
+  lcd.setTextColor(BLACK);
+  lcd.print("Lvl ");
   lcd.println(level);
-  lcd.print("Points: ");
+  lcd.print("Pts ");
   lcd.println(point -1);
   lcd.display();
-  delay(2500);
+  delay(4000); 
   
-  lcd.clearDisplay();
-  lcd.setTextSize(2);
-  lcd.println("  Try");
-  lcd.println(" Again!");
-  lcd.display();  
-  delay(1500);
-
   resetGame();  
 }
 
@@ -389,6 +347,21 @@ void gameover()
  */
 void resetGame()
 {
+  lcd.clearDisplay();
+  lcd.setTextSize(2);
+  lcd.println("");
+  lcd.println("Ready?");
+  lcd.display();  
+  delay(2000);
+  
+  lcd.clearDisplay();
+  lcd.println("");
+  lcd.println("  Go!");
+  lcd.display();
+  lcd.setTextSize(1);
+
+  delay(1000);
+  
  snakeLen = SNAKE_LEN;
  
  for(int i=0; i < (snakeLen-1); i++)
@@ -396,6 +369,13 @@ void resetGame()
    snakeCols[i] = i;
    snakeRow[i]  = (MAX_HEIGHT / 2);
  }
+ 
+ xSnake = 0;
+ ySnake = (MAX_WIDTH / 2);
+ 
+ xFood = (lcd.width() / 2);
+ yFood = (lcd.height() / 2);
+ 
  
  level  = 0;  
  point  = 0;
@@ -423,59 +403,13 @@ void intro()
   lcd.setTextColor(BLACK);
   lcd.print("Duino");
   lcd.setTextColor(WHITE, BLACK);
-  lcd.print("II");
+  lcd.print(" 3");
   lcd.setTextSize(1);
   lcd.setTextColor(BLACK);
   lcd.println("");
-  lcd.print("by hewerthomn ");
-  lcd.display();
-  delay(2500);
-}
-
-void calibrateAccelerometer()
-{
-  double var = 5000;
-  double sumX = 0;
-  double sumY = 0;
-  double sumZ = 0;
-  
-  lcd.clearDisplay();
-  lcd.print("Calibrando");
-  lcd.display();
-  for (int i = 0;i<var;i++)
-  {
-    sumX = sumX + accelero.getXVolt();
-    sumY = sumY + accelero.getYVolt();
-    sumZ = sumZ + accelero.getZVolt();
-    if (i%100 == 0)
-    {
-      lcd.print(".");
-      lcd.display();
-    }
-  }
-  
-  if (acceleroSensi == false)
-  {
-    accelero.setOffSets(1672 - sumX / var,1671 - sumY / var, + 1876 - sumZ / var);
-  }
-  else
-  {
-    accelero.setOffSets(1650 - sumX / var,1650 - sumY / var, + 2450 - sumZ / var);
-  }
-  if (abs(accelero.getOrientation())!=3)
-  {
-    lcd.setTextColor(WHITE, BLACK);
-    lcd.println("Falha!");
-    accelero.setOffSets(0,0,0);
-  }
-  else
-  {
-    lcd.println("Pronto!");
-  }
-  lcd.display();
-  
-  delay(2000);  
-  lcd.clearDisplay();
+  lcd.println("by hewerthomn");  
+  lcd.display();  
+  delay(8000);
 }
 
 /*
@@ -494,6 +428,5 @@ void beep(int frequencyInHertz, long timeInMilliseconds)
     delayMicroseconds(delayAmount);
   }
   
-  delay(2);
-  // a little delay to make all notes sound separate
+  delay(2);// a little delay to make all notes sound separate
 }
