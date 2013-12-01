@@ -44,7 +44,7 @@
 
 /* defaults */
 #define SNAKE_LEN   10
-#define SNAKE_SPEED 40
+#define SNAKE_SPEED 20
 
 
 /* lcd display */
