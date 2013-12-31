@@ -16,7 +16,7 @@ Video https://vimeo.com/80725135
 >## Libraries
 > - Adafruit GFX     https://github.com/adafruit/Adafruit-GFX-Library
 > - Adafruit PCD8544 https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
-> - N64Controller    http://mbed.org/users/purplelion/code/N64Controller
+> - N64Controller    http://pothos.blogsport.eu/files/2012/03/N64Controller.zip
 
 --------------
 
