@@ -1,16 +1,17 @@
-#Snake Duino III
+# Snake Duino III
 --------------
 
 Arduino Snake game controlled by N64 Controller
 
 Video https://vimeo.com/80725135
 
-
 -----------
->##Components
+>## Components
 > - Nokia 5110 LCD attached to pins 7, 6, 5, 4, 3
 > - Active Buzzer attached to pin 8
 > - N64 Controller attached to pin 2
+
+![sketch.png](sketch.png)
 
 -------------
 >## Libraries
@@ -20,8 +21,8 @@ Video https://vimeo.com/80725135
 
 --------------
 
->##License
->THE BEER-WARE LICENSE" (Revision 42):
->[phk@FreeBSD.ORG]() wrote this file. As long as you retain this notice you
->can do whatever you want with this stuff. If we meet some day, and you think
->this stuff is worth it, you can buy me a beer in return Poul-Henning Kamp
+>## License
+THE BEER-WARE LICENSE" (Revision 42):
+[phk@FreeBSD.ORG]() wrote this file. As long as you retain this notice you
+can do whatever you want with this stuff. If we meet some day, and you think
+this stuff is worth it, you can buy me a beer in return Poul-Henning Kamp
