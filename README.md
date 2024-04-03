@@ -14,6 +14,9 @@ Video https://vimeo.com/80725135
 
 ![snake-duino-3.jpg](snake-duino-3.jpg)
 
+![snake-duino-3.gif](snake-duino-3.gif)
+
+
 ## Libraries
 - Adafruit GFX     https://github.com/adafruit/Adafruit-GFX-Library
 - Adafruit PCD8544 https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
